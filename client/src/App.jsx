@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import Library from "./components/Library";
-import MyLibrary from "./components/Mylibrary";
+import Library from "./pages/Library";
+import MyLibrary from "./pages/MyLibrary";
 import BookOfTheDay from "./components/BookOfTheDay";
 import AuthorOfTheDay from "./components/AuthorOfTheDay";
 import Membership from "./components/Membership";
 import "./App.css";
+import Membership from "./pages/Membership";
+
+
 function App() {
   const [user, setUser] = useState({ id: 1, username: "Alice" });
 
