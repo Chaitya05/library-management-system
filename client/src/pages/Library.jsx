@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function Library() {
+function Library() {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
@@ -11,13 +11,15 @@ export default function Library() {
   }, []);
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h2>Library</h2>
       <ul>
         {books.map(b => (
-          <li key={b.id}>{b.title} by {b.author} ({b.total_pages} pages)</li>
+          <li key={b.id}>{b.title} by {b.author}</li>
         ))}
       </ul>
     </div>
   );
 }
+
+export default Library;
