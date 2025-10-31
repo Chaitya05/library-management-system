@@ -5,7 +5,7 @@ export default function BookOfTheDay() {
   const [book, setBook] = useState(null);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/book_of_the_day")
+    axios.get("http://localhost:5000/book_of_the_day")
       .then(res => setBook(res.data))
       .catch(err => console.error(err));
   }, []);

@@ -5,7 +5,7 @@ export default function AuthorOfTheDay() {
   const [author, setAuthor] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/author_of_the_day")
+    axios.get("http://localhost:5000/author_of_the_day")
       .then(res => setAuthor(res.data.author))
       .catch(err => console.error(err));
   }, []);
