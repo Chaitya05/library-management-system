@@ -1,82 +1,75 @@
+// src/pages/SignUp.jsx
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-function Signup() {
+function SignUp({ setUser }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSignup = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", {
+      const res = await axios.post("http://localhost:5000/api/users/signup", {
         name,
         email,
         password,
       });
 
-      alert(res.data.message);
-      navigate("/signin");
+      if (res.data.success) {
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        setUser(res.data.user);
+        navigate("/");
+      } else {
+        setError(res.data.message || "Signup failed");
+      }
     } catch (err) {
-      alert(err.response?.data?.message || "Signup failed");
+      console.error("❌ Signup error:", err.response?.data || err.message);
+      setError(err.response?.data?.message || "Something went wrong during signup");
     }
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "80px" }}>
+    <div style={{ maxWidth: "400px", margin: "auto" }}>
       <h2>Sign Up</h2>
-      <form onSubmit={handleSignup} style={{ display: "inline-block", textAlign: "left" }}>
-        <div style={{ marginBottom: "10px" }}>
-          <label>Name:</label>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Name:</label><br />
           <input
             type="text"
-            required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{ display: "block", width: "250px", padding: "8px" }}
+            required
           />
         </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <label>Email:</label>
+        <div>
+          <label>Email:</label><br />
           <input
             type="email"
-            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{ display: "block", width: "250px", padding: "8px" }}
+            required
           />
         </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <label>Password:</label>
+        <div>
+          <label>Password:</label><br />
           <input
             type="password"
-            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ display: "block", width: "250px", padding: "8px" }}
+            required
           />
         </div>
-
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "10px",
-            background: "green",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Sign Up
-        </button>
+        <button type="submit">Sign Up</button>
       </form>
     </div>
   );
 }
 
-export default Signup;
+export default SignUp;

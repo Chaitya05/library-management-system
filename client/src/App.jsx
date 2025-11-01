@@ -1,5 +1,6 @@
-import React from "react";
-import { Routes, Route, Link } from "react-router-dom";
+// App.jsx
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import "./App.css";
 
 // Pages & Components
@@ -13,57 +14,53 @@ import SignUp from "./pages/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
+  // Load user from localStorage on app start
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) setUser(storedUser);
+  }, []);
+
+  // Handle logout
   const handleSignOut = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    window.location.href = "/signin";
+    setUser(null);
+    navigate("/signin");
   };
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Hi {user ? user.name || "Reader" : "Guest"}</h1>
 
-      <nav
-        style={{
-          marginBottom: "20px",
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "10px",
-        }}
-      >
-        {/* Always visible links */}
-        <Link to="/">Library</Link>
-        <Link to="/book-of-the-day">Book of the Day</Link>
-        <Link to="/author-of-the-day">Author of the Day</Link>
+      <nav style={{ marginBottom: "20px" }}>
+        <Link to="/" style={{ marginRight: "10px" }}>Library</Link>
+        <Link to="/book-of-the-day" style={{ marginRight: "10px" }}>Book of the Day</Link>
+        <Link to="/author-of-the-day" style={{ marginRight: "10px" }}>Author of the Day</Link>
 
-        {/* Visible only after login */}
+        {/* Protected links visible only after login */}
         {user && (
           <>
-            <Link to="/my-library">My Library</Link>
-            <Link to="/membership">Membership</Link>
+            <Link to="/my-library" style={{ marginRight: "10px" }}>My Library</Link>
+            <Link to="/membership" style={{ marginRight: "10px" }}>Membership</Link>
           </>
         )}
 
-        {/* Auth Links */}
+        {/* Auth links */}
         {!user ? (
           <>
-            <Link to="/signin" style={{ color: "green" }}>
-              Sign In
-            </Link>
-            <Link to="/signup" style={{ color: "blue" }}>
-              Sign Up
-            </Link>
+            <Link to="/signin" style={{ marginRight: "10px", color: "green" }}>Sign In</Link>
+            <Link to="/signup" style={{ color: "blue" }}>Sign Up</Link>
           </>
         ) : (
           <button
             onClick={handleSignOut}
             style={{
-              background: "red",
               color: "white",
+              backgroundColor: "red",
               border: "none",
-              borderRadius: "5px",
+              borderRadius: "4px",
               padding: "5px 10px",
               cursor: "pointer",
             }}
@@ -78,8 +75,10 @@ function App() {
         <Route path="/" element={<Library />} />
         <Route path="/book-of-the-day" element={<BookOfTheDay />} />
         <Route path="/author-of-the-day" element={<AuthorOfTheDay />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+
+        {/* Auth routes */}
+        <Route path="/signin" element={<SignIn setUser={setUser} />} />
+        <Route path="/signup" element={<SignUp setUser={setUser} />} />
 
         {/* Protected routes */}
         <Route

@@ -1,88 +1,101 @@
+// server/routes/authRoutes.js
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import db from "../db.js";
 
 const router = express.Router();
+const JWT_SECRET = "supersecretkey"; // Use .env later
 
-// 🔑 JWT secret (you can move this to .env)
-const JWT_SECRET = "your_jwt_secret";
-
-// 🟩 SIGNUP ROUTE
+// ✅ SIGNUP + Auto Login
 router.post("/signup", async (req, res) => {
-  const { name, email, password, membership_type } = req.body;
+  const { name, email, password } = req.body;
   console.log("🟢 Signup attempt:", { name, email });
 
+  if (!name || !email || !password)
+    return res.status(400).json({ success: false, message: "Please fill all fields" });
+
   try {
-    // Check if user already exists
     db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
       if (err) {
         console.error("❌ DB SELECT error:", err);
-        return res.status(500).json({ message: "Database error (SELECT)" });
+        return res.status(500).json({ success: false, message: "Database error" });
       }
 
       if (result.length > 0)
-        return res.status(400).json({ message: "User already exists" });
+        return res.status(400).json({ success: false, message: "User already exists" });
 
-      // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Insert new user
-      const sql = `
-        INSERT INTO users (name, email, password, membership_type, join_date)
-        VALUES (?, ?, ?, ?, NOW())
-      `;
-      const values = [name, email, hashedPassword, membership_type || "Basic"];
+      db.query(
+        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+        [name, email, hashedPassword],
+        (err2, result2) => {
+          if (err2) {
+            console.error("❌ DB INSERT error:", err2);
+            return res.status(500).json({ success: false, message: "Signup failed" });
+          }
 
-      db.query(sql, values, (err2, result2) => {
-        if (err2) {
-          console.error("❌ DB INSERT error:", err2);
-          return res.status(500).json({ message: "Database error (INSERT)" });
+          // Auto login token creation
+          const user_id = result2.insertId;
+          const token = jwt.sign({ user_id, email }, JWT_SECRET, { expiresIn: "2h" });
+
+          console.log("✅ User registered & auto-logged in:", email);
+
+          res.status(201).json({
+            success: true,
+            message: "User registered and logged in",
+            token,
+            user: { user_id, name, email },
+          });
         }
-
-        console.log("✅ User registered:", result2);
-        return res.status(201).json({ message: "User registered successfully" });
-      });
+      );
     });
   } catch (error) {
-    console.error("❌ Signup catch error:", error);
-    res.status(500).json({ message: error.message });
+    console.error("❌ Signup error:", error);
+    res.status(500).json({ success: false, message: "Signup failed" });
   }
 });
 
-// 🟦 SIGNIN ROUTE
+
+
+// ✅ SIGNIN
 router.post("/signin", (req, res) => {
   const { email, password } = req.body;
+  console.log("🟢 Signin attempt:", { email });
+
+  if (!email || !password)
+    return res.status(400).json({ success: false, message: "Please fill all fields" });
 
   db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
     if (err) {
       console.error("❌ DB SELECT error:", err);
-      return res.status(500).json({ message: "Database error" });
+      return res.status(500).json({ success: false, message: "Database error" });
     }
 
     if (result.length === 0)
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ success: false, message: "Invalid email or password" });
 
     const user = result[0];
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch)
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ success: false, message: "Invalid email or password" });
 
-    const token = jwt.sign(
-      { id: user.user_id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: "2h" }
-    );
+    const token = jwt.sign({ user_id: user.user_id, email: user.email }, JWT_SECRET, {
+      expiresIn: "2h",
+    });
+
+    console.log("✅ Login successful:", user.email);
 
     res.status(200).json({
+      success: true,
       message: "Login successful",
       token,
       user: {
-        id: user.user_id,
+        user_id: user.user_id,
         name: user.name,
         email: user.email,
-        membership_type: user.membership_type,
       },
     });
   });

@@ -1,121 +1,64 @@
+// src/pages/SignIn.jsx
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
 
-const SignIn = () => {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+function SignIn({ setUser }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Handle input
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  // Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signin", form);
+      const res = await axios.post("http://localhost:5000/api/users/signin", {
+        email,
+        password,
+      });
 
-      // Save user + token to localStorage
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      localStorage.setItem("token", res.data.token);
-
-      // Redirect to homepage
-      navigate("/");
+      if (res.data.success) {
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        setUser(res.data.user);
+        navigate("/");
+      } else {
+        setError(res.data.message || "Invalid email or password");
+      }
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Sign in failed. Please try again."
-      );
-    } finally {
-      setLoading(false);
+      console.error("❌ SignIn error:", err.response?.data || err.message);
+      setError(err.response?.data?.message || "Something went wrong during sign in");
     }
   };
 
   return (
-    <div
-      style={{
-        maxWidth: "400px",
-        margin: "80px auto",
-        padding: "30px",
-        border: "1px solid #ccc",
-        borderRadius: "12px",
-        background: "#f8f9fa",
-      }}
-    >
-      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Sign In</h2>
-
-      {error && (
-        <p style={{ color: "red", textAlign: "center", marginBottom: "10px" }}>
-          {error}
-        </p>
-      )}
-
+    <div style={{ maxWidth: "400px", margin: "auto" }}>
+      <h2>Sign In</h2>
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "15px" }}>
-          <label>Email:</label>
+        <div>
+          <label>Email:</label><br />
           <input
             type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
-            style={{
-              width: "100%",
-              padding: "8px",
-              borderRadius: "6px",
-              border: "1px solid #aaa",
-            }}
           />
         </div>
-
-        <div style={{ marginBottom: "15px" }}>
-          <label>Password:</label>
+        <div>
+          <label>Password:</label><br />
           <input
             type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
-            style={{
-              width: "100%",
-              padding: "8px",
-              borderRadius: "6px",
-              border: "1px solid #aaa",
-            }}
           />
         </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "10px",
-            borderRadius: "6px",
-            backgroundColor: loading ? "#999" : "#007bff",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Signing in..." : "Sign In"}
-        </button>
+        <button type="submit">Sign In</button>
       </form>
-
-      <p style={{ textAlign: "center", marginTop: "15px" }}>
-        Don’t have an account?{" "}
-        <Link to="/signup" style={{ color: "#007bff" }}>
-          Sign Up
-        </Link>
-      </p>
     </div>
   );
-};
+}
 
 export default SignIn;
