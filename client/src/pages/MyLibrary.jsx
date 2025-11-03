@@ -1,74 +1,70 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 function MyLibrary() {
   const [borrowedBooks, setBorrowedBooks] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    const fetchBorrowedBooks = async () => {
-      try {
-        // demo: assuming user_id = 1
-        const response = await axios.get("http://localhost:5000/borrowed_books/1");
-        setBorrowedBooks(response.data);
-      } catch (error) {
-        console.error("Error fetching borrowed books:", error);
-      }
-    };
+    if (!user) {
+      toast.error("Please sign in first");
+      return;
+    }
 
-    fetchBorrowedBooks();
-  }, []);
+    axios
+      .get(`http://localhost:5000/api/books/borrowed_books/${user.user_id}`)
+      .then((res) => setBorrowedBooks(res.data))
+      .catch((err) => console.error(err));
+  }, [user]);
+
+  const handleReturn = async (book_id) => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/books/return", {
+        user_id: user.user_id,
+        book_id,
+      });
+      toast.success(res.data.message || "Book returned successfully!");
+      setBorrowedBooks(borrowedBooks.filter((b) => b.book_id !== book_id));
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to return book");
+    }
+  };
 
   return (
-    <div className="p-8 bg-gradient-to-b from-gray-50 to-gray-200 min-h-screen">
-      <h2 className="text-3xl font-extrabold mb-8 text-center text-gray-800">
-        📚 My Borrowed Books
-      </h2>
-
+    <div style={{ padding: 20 }}>
+      <h2>My Library</h2>
       {borrowedBooks.length === 0 ? (
-        <p className="text-center text-gray-600">No borrowed books yet!</p>
+        <p>No borrowed books yet.</p>
       ) : (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <ul style={{ listStyle: "none", padding: 0 }}>
           {borrowedBooks.map((book) => (
-            <div
-              key={book.borrow_id}
-              className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all"
+            <li
+              key={book.book_id}
+              style={{
+                marginBottom: 12,
+                padding: 10,
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              <h3 className="text-xl font-semibold text-blue-700 mb-1">
-                {book.title}
-              </h3>
-              <p className="text-gray-700 mb-1">
-                <span className="font-medium">Author:</span> {book.author}
-              </p>
-              <p className="text-gray-700 mb-1">
-                <span className="font-medium">Borrowed:</span>{" "}
-                {book.date_borrowed}
-              </p>
-              <p className="text-gray-700 mb-4">
-                <span className="font-medium">Return by:</span>{" "}
-                {book.date_to_return}
-              </p>
-
-              {/* progress bar */}
-              <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className={`absolute top-0 left-0 h-full transition-all duration-500 ${
-                    book.progress >= 100
-                      ? "bg-green-500"
-                      : book.progress >= 70
-                      ? "bg-blue-500"
-                      : "bg-yellow-400"
-                  }`}
-                  style={{ width: `${book.progress}%` }}
-                ></div>
+              <div>
+                <b>{book.title}</b> <br />
+                <small>by {book.author}</small>
               </div>
-
-              <div className="flex justify-between mt-2 text-sm text-gray-600">
-                <span>Progress</span>
-                <span>{book.progress}%</span>
-              </div>
-            </div>
+              <button
+                onClick={() => handleReturn(book.book_id)}
+                style={{ background: "#e74c3c", color: "white", border: "none", padding: "6px 10px", borderRadius: 4 }}
+              >
+                Return
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );

@@ -1,29 +1,108 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 function Library() {
   const [books, setBooks] = useState([]);
+  const [borrowedBooks, setBorrowedBooks] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
 
+  // ✅ Fetch all books
   useEffect(() => {
     axios
-      .get("http://localhost:5000/books")
+      .get("http://localhost:5000/api/books")
       .then((res) => setBooks(res.data))
       .catch((err) => console.error(err));
   }, []);
 
+  // ✅ Fetch user's borrowed books (to prevent duplicate borrow)
+  useEffect(() => {
+    if (user) {
+      axios
+        .get(`http://localhost:5000/api/books/borrowed_books/${user.user_id}`)
+        .then((res) => setBorrowedBooks(res.data.map((b) => b.book_id)))
+        .catch((err) => console.error(err));
+    }
+  }, [user]);
+
+  // ✅ Borrow handler
+  const handleBorrow = async (book_id) => {
+    if (!user) {
+      toast.error("Please sign in first");
+      return;
+    }
+
+    // Prevent duplicate borrow on frontend
+    if (borrowedBooks.includes(book_id)) {
+      toast.warning("You already borrowed this book!");
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/books/borrow", {
+        user_id: user.user_id,
+        book_id,
+      });
+
+      toast.success(res.data.message || "Book borrowed successfully!");
+      setBorrowedBooks([...borrowedBooks, book_id]); // update local state
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to borrow book");
+    }
+  };
+
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-semibold mb-4 text-center">Library Books</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {books.map((book) => (
-          <div key={book.book_id} className="p-4 border rounded-lg shadow-lg hover:shadow-xl transition">
-            <h3 className="text-xl font-bold">{book.title}</h3>
-            <p className="text-gray-600">Author: {book.author}</p>
-            <p className="text-gray-500">Genre: {book.genre}</p>
-            <p className="text-gray-500">Published: {book.published_year}</p>
-          </div>
-        ))}
-      </div>
+    <div style={{ padding: 20 }}>
+      <h2>Library</h2>
+      {books.length === 0 ? (
+        <p>Loading books...</p>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {books.map((book) => (
+            <div
+              key={book.book_id}
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                padding: 12,
+                boxShadow: "2px 2px 6px rgba(0,0,0,0.1)",
+              }}
+            >
+              <h4>{book.title}</h4>
+              <p>
+                <b>Author:</b> {book.author}
+              </p>
+              <button
+                onClick={() => handleBorrow(book.book_id)}
+                disabled={borrowedBooks.includes(book.book_id)}
+                style={{
+                  background: borrowedBooks.includes(book.book_id)
+                    ? "#999"
+                    : "#2ecc71",
+                  color: "white",
+                  border: "none",
+                  padding: "6px 10px",
+                  borderRadius: 4,
+                  cursor: borrowedBooks.includes(book.book_id)
+                    ? "not-allowed"
+                    : "pointer",
+                }}
+              >
+                {borrowedBooks.includes(book.book_id)
+                  ? "Already Borrowed"
+                  : "Borrow"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
