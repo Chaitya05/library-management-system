@@ -1,47 +1,80 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 
-function SignUp({ setUser }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const SignUp = ({ setUser }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+  });
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const submit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", { name, email, password });
-      if (res.data.success) {
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        localStorage.setItem("token", res.data.token);
-        setUser(res.data.user);
-        toast.success("Signed up");
-        navigate("/");
-      } else {
-        toast.error(res.data.message || "Signup failed");
-      }
+      const res = await axios.post("http://localhost:5000/api/auth/signup", formData);
+      const { user, token } = res.data;
+
+      // ✅ Save user + token
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+
+      // ✅ Update App state
+      setUser(user);
+
+      alert("Signup successful!");
+      navigate("/");
     } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Something went wrong during signup");
+      console.error("Signup Error:", err);
+      alert(err.response?.data?.message || "Signup failed");
     }
   };
 
   return (
-    <div style={{ maxWidth: 420, margin: "40px auto" }}>
+    <div className="signup-container">
       <h2>Sign Up</h2>
       <form onSubmit={submit}>
-        <div><label>Name</label><br/>
-          <input value={name} onChange={e=>setName(e.target.value)} required/></div>
-        <div style={{marginTop:8}}><label>Email</label><br/>
-          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></div>
-        <div style={{marginTop:8}}><label>Password</label><br/>
-          <input type="password" value={password} onChange={e=>setPassword(e.target.value)} required/></div>
-        <button style={{marginTop:12}} type="submit">Sign Up</button>
+        <input
+          type="text"
+          name="name"
+          placeholder="Full Name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="phone"
+          placeholder="Phone (optional)"
+          value={formData.phone}
+          onChange={handleChange}
+        />
+        <button type="submit">Sign Up</button>
       </form>
     </div>
   );
-}
+};
 
 export default SignUp;

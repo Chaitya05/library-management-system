@@ -29,11 +29,17 @@ router.post("/borrow", (req, res) => {
           .json({ message: "You already borrowed this book!" });
       }
 
+      // ✅ Fixed column names according to your database
       db.query(
-        "INSERT INTO borrowed_books (user_id, book_id, borrowed_date) VALUES (?, ?, NOW())",
+        `INSERT INTO borrowed_books 
+         (user_id, book_id, date_borrowed, date_to_return, progress, returned)
+         VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY), 0, 0)`,
         [user_id, book_id],
         (err2) => {
-          if (err2) return res.status(500).json({ message: "Database error" });
+          if (err2) {
+            console.error("Borrow Error:", err2);
+            return res.status(500).json({ message: "Database error" });
+          }
           res.json({ success: true, message: "Book borrowed successfully!" });
         }
       );
