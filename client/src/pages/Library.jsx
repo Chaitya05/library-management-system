@@ -7,7 +7,6 @@ function Library() {
   const [borrowedBooks, setBorrowedBooks] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // ✅ Fetch all books
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/books")
@@ -15,7 +14,6 @@ function Library() {
       .catch((err) => console.error(err));
   }, []);
 
-  // ✅ Fetch user's borrowed books (to prevent duplicate borrow)
   useEffect(() => {
     if (user) {
       axios
@@ -25,14 +23,12 @@ function Library() {
     }
   }, [user]);
 
-  // ✅ Borrow handler
   const handleBorrow = async (book_id) => {
     if (!user) {
       toast.error("Please sign in first");
       return;
     }
 
-    // Prevent duplicate borrow on frontend
     if (borrowedBooks.includes(book_id)) {
       toast.warning("You already borrowed this book!");
       return;
@@ -43,13 +39,22 @@ function Library() {
         user_id: user.user_id,
         book_id,
       });
-
       toast.success(res.data.message || "Book borrowed successfully!");
-      setBorrowedBooks([...borrowedBooks, book_id]); // update local state
+      setBorrowedBooks([...borrowedBooks, book_id]);
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to borrow book");
     }
+  };
+
+  // Map titles to their cover images
+  const coverImages = {
+    "Atomic Habits": "/images/covers/atomic_habits.jpg",
+    "The Alchemist": "/images/covers/the_alchemist.jpg",
+    "Ikigai": "/images/covers/ikigai.jpg",
+    "Wings of Fire": "/images/covers/wings_of_fire.jpg",
+    "Rich Dad Poor Dad": "/images/covers/rich_dad_poor_dad.jpg",
+    "The Psychology of Money": "/images/covers/psychology_of_money.jpg",
   };
 
   return (
@@ -73,12 +78,24 @@ function Library() {
                 borderRadius: 8,
                 padding: 12,
                 boxShadow: "2px 2px 6px rgba(0,0,0,0.1)",
+                textAlign: "center",
               }}
             >
+              {/* Book cover */}
+              <img
+                src={coverImages[book.title] || "/images/covers/default.jpg"}
+                alt={book.title}
+                style={{
+                  width: "100%",
+                  height: "280px",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                  marginBottom: "10px",
+                }}
+              />
               <h4>{book.title}</h4>
-              <p>
-                <b>Author:</b> {book.author}
-              </p>
+              <p><b>Author:</b> {book.author}</p>
+
               <button
                 onClick={() => handleBorrow(book.book_id)}
                 disabled={borrowedBooks.includes(book.book_id)}

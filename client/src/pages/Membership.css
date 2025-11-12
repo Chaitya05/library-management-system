@@ -1,0 +1,105 @@
+/* Main container */
+.membership-container {
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #f9f6f1;
+  min-height: 85vh;
+}
+
+/* Title + subtitle */
+.membership-title {
+  font-size: 2rem;
+  color: #4b2e05;
+  margin-bottom: 8px;
+  font-family: "Georgia", serif;
+}
+
+.membership-subtitle {
+  color: #6b5b4c;
+  font-size: 1.1rem;
+  margin-bottom: 35px;
+}
+
+/* Grid layout for plans */
+.membership-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+/* Each card */
+.membership-card {
+  width: 260px;
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 2px solid transparent;
+}
+
+.membership-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* Plan name + price */
+.plan-name {
+  font-size: 1.4rem;
+  color: #3a2202;
+  margin-bottom: 6px;
+}
+
+.plan-price {
+  font-size: 1.1rem;
+  color: #8b6b3f;
+  margin-bottom: 14px;
+  font-weight: bold;
+}
+
+/* Feature list */
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+  text-align: left;
+  color: #3e3e3e;
+}
+
+.plan-features li {
+  padding: 5px 0;
+  border-bottom: 1px dashed #d8b98a;
+  font-size: 0.95rem;
+}
+
+/* Join button */
+.join-btn {
+  background-color: #5a2d0c;
+  color: #f5deb3;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.join-btn:hover {
+  background-color: #7b3f14;
+}
+
+/* Plan-specific colors */
+.basic {
+  background-color: #e9f2ff;
+  border-color: #bcd3ff;
+}
+
+.premium {
+  background-color: #fff8db;
+  border-color: #f3e4a7;
+}
+
+.platinum {
+  background-color: #e9fdea;
+  border-color: #b8e8c3;
+}

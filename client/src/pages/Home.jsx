@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "./Home.css";
 
-const Home = ({ user }) => {
+const Home = ({ user, onSignOut }) => {
   const [bookOfTheDay, setBookOfTheDay] = useState(null);
   const [authorOfTheDay, setAuthorOfTheDay] = useState(null);
 
@@ -21,51 +22,72 @@ const Home = ({ user }) => {
     fetchData();
   }, []);
 
+  // Helper to match book cover filename
+  const getCoverImage = (title) => {
+    if (!title) return "/images/covers/default.jpg";
+    const formatted = title
+      .toLowerCase()
+      .replaceAll(" ", "_")
+      .replaceAll("'", "")
+      .replaceAll(":", "");
+    return `/images/covers/${formatted}.jpg`;
+  };
+
   return (
-    <div style={{ maxWidth: 900, margin: "40px auto", textAlign: "center" }}>
-      <h2>Welcome{user ? `, ${user.name}` : ""} 👋</h2>
-      <p>Your personalized digital library awaits.</p>
+    <div className="home-bg">
+      <div className="home-container">
+        {/* --- Header with Welcome + Sign Out --- */}
+        <div className="home-header">
+          <h2 className="home-welcome">
+            Welcome{user ? `, ${user.name}` : ""} 👋
+          </h2>
+          {user && (
+            <button className="signout-btn" onClick={onSignOut}>
+              Sign Out
+            </button>
+          )}
+        </div>
 
-      {/* --- Book of the Day --- */}
-      <section style={{ marginTop: 40 }}>
-        <h3>📚 Book of the Day</h3>
-        {bookOfTheDay ? (
-          <div
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: 8,
-              padding: 20,
-              marginTop: 12,
-            }}
-          >
-            <h4>{bookOfTheDay.title}</h4>
-            <p><strong>Author:</strong> {bookOfTheDay.author}</p>
-            <p><strong>Genre:</strong> {bookOfTheDay.genre}</p>
-            <p>{bookOfTheDay.description}</p>
-          </div>
-        ) : (
-          <p>Loading Book of the Day...</p>
-        )}
-      </section>
+        <p className="home-subtext">Your personalized digital library awaits.</p>
 
-      {/* --- Author of the Day --- */}
-      <section style={{ marginTop: 40 }}>
-        <h3>✍️ Author of the Day</h3>
-        {authorOfTheDay ? (
-          <div
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: 8,
-              padding: 20,
-              marginTop: 12,
-            }}
-          >
-            <h4>{authorOfTheDay.author}</h4>
-          </div>
-        ) : (
-          <p>Loading Author of the Day...</p>
-        )}
-      </section>
+        {/* --- Book of the Day --- */}
+        <section className="home-section">
+          <h3 className="section-title">📚 Book of the Day</h3>
+          {bookOfTheDay ? (
+            <div className="card book-card">
+              <img
+                src={getCoverImage(bookOfTheDay.title)}
+                alt={bookOfTheDay.title}
+                className="book-cover"
+              />
+              <div className="book-info">
+                <h4 className="card-title">{bookOfTheDay.title}</h4>
+                <p>
+                  <strong>Author:</strong> {bookOfTheDay.author}
+                </p>
+                <p>
+                  <strong>Genre:</strong> {bookOfTheDay.genre}
+                </p>
+                <p className="card-desc">{bookOfTheDay.description}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="loading-text">Loading Book of the Day...</p>
+          )}
+        </section>
+
+        {/* --- Author of the Day --- */}
+        <section className="home-section">
+          <h3 className="section-title">✍️ Author of the Day</h3>
+          {authorOfTheDay ? (
+            <div className="card">
+              <h4 className="card-title">{authorOfTheDay.author}</h4>
+            </div>
+          ) : (
+            <p className="loading-text">Loading Author of the Day...</p>
+          )}
+        </section>
+      </div>
     </div>
   );
 };

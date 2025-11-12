@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import "./MyLibrary.css";
 
 function MyLibrary() {
   const [borrowedBooks, setBorrowedBooks] = useState([]);
+  const [filter, setFilter] = useState("all");
+  const [sort, setSort] = useState("title");
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
@@ -18,7 +21,9 @@ function MyLibrary() {
       .catch((err) => console.error(err));
   }, [user]);
 
-  const handleReturn = async (book_id) => {
+  const handleReturn = async (book_id, title) => {
+    if (!window.confirm(`Return "${title}"?`)) return;
+
     try {
       const res = await axios.post("http://localhost:5000/api/books/return", {
         user_id: user.user_id,
@@ -32,39 +37,80 @@ function MyLibrary() {
     }
   };
 
+  // Helper: Generate local cover image path from title
+  const getCoverImage = (title) => {
+    const formatted = title
+      .toLowerCase()
+      .replaceAll(" ", "_")
+      .replaceAll("'", "")
+      .replaceAll(":", "");
+    return `/images/covers/${formatted}.jpg`;
+  };
+
+  const filteredBooks =
+    filter === "all"
+      ? borrowedBooks
+      : borrowedBooks.filter((b) => b.category === filter);
+
+  const sortedBooks = [...filteredBooks].sort((a, b) =>
+    sort === "title"
+      ? a.title.localeCompare(b.title)
+      : new Date(a.borrow_date) - new Date(b.borrow_date)
+  );
+
   return (
-    <div style={{ padding: 20 }}>
-      <h2>My Library</h2>
-      {borrowedBooks.length === 0 ? (
-        <p>No borrowed books yet.</p>
+    <div className="mylibrary-container">
+      <h2>📚 My Library</h2>
+
+      <div className="mylibrary-controls">
+        <select onChange={(e) => setFilter(e.target.value)} value={filter}>
+          <option value="all">All Categories</option>
+          <option value="Fiction">Fiction</option>
+          <option value="Science">Science</option>
+          <option value="Technology">Technology</option>
+          <option value="History">History</option>
+        </select>
+
+        <select onChange={(e) => setSort(e.target.value)} value={sort}>
+          <option value="title">Sort by Title</option>
+          <option value="date">Sort by Borrow Date</option>
+        </select>
+      </div>
+
+      {sortedBooks.length === 0 ? (
+        <p className="empty-msg">No borrowed books yet.</p>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {borrowedBooks.map((book) => (
-            <li
-              key={book.book_id}
-              style={{
-                marginBottom: 12,
-                padding: 10,
-                border: "1px solid #ccc",
-                borderRadius: 8,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div>
-                <b>{book.title}</b> <br />
-                <small>by {book.author}</small>
+        <div className="book-grid">
+          {sortedBooks.map((book) => (
+            <div key={book.book_id} className="book-card">
+              <img
+                src={getCoverImage(book.title)}
+                alt={book.title}
+                className="book-cover"
+                onError={(e) => (e.target.src = "/default-book.png")} // fallback
+              />
+              <div className="book-details">
+                <h4>{book.title}</h4>
+                <p>by {book.author}</p>
+                {book.category && (
+                  <p className="category">Category: {book.category}</p>
+                )}
+                {book.borrow_date && (
+                  <p className="date">
+                    Borrowed:{" "}
+                    {new Date(book.borrow_date).toLocaleDateString()}
+                  </p>
+                )}
+                <button
+                  onClick={() => handleReturn(book.book_id, book.title)}
+                  className="return-btn"
+                >
+                  Return
+                </button>
               </div>
-              <button
-                onClick={() => handleReturn(book.book_id)}
-                style={{ background: "#e74c3c", color: "white", border: "none", padding: "6px 10px", borderRadius: 4 }}
-              >
-                Return
-              </button>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

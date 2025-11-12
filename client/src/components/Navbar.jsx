@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "./Navbar.css";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -12,50 +13,36 @@ function Navbar() {
   };
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        padding: "15px 30px",
-        backgroundColor: "#333",
-        color: "white",
-      }}
-    >
-      <div>
-        <Link to="/" style={{ color: "white", textDecoration: "none", fontSize: "18px" }}>
-          Library Management
+    <nav className="navbar">
+      <div className="navbar-left">
+        <Link to="/" className="navbar-logo">
+          📚 Library Management
         </Link>
+        {user && (
+          <span className="navbar-greeting">Hi, {user.name || user.username || "User"}</span>
+
+        )}
       </div>
 
-      <div style={{ display: "flex", gap: "15px" }}>
+      <div className="navbar-right">
         {user ? (
           <>
-            <Link to="/mylibrary" style={{ color: "white", textDecoration: "none" }}>
+            <Link to="/mylibrary" className="navbar-link">
               My Library
             </Link>
-            <Link to="/membership" style={{ color: "white", textDecoration: "none" }}>
+            <Link to="/membership" className="navbar-link">
               Membership
             </Link>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: "red",
-                border: "none",
-                color: "white",
-                cursor: "pointer",
-                padding: "5px 10px",
-                borderRadius: "5px",
-              }}
-            >
+            <button onClick={handleLogout} className="signout-btn">
               Sign Out
             </button>
           </>
         ) : (
           <>
-            <Link to="/signin" style={{ color: "white", textDecoration: "none" }}>
+            <Link to="/signin" className="navbar-link auth">
               Sign In
             </Link>
-            <Link to="/signup" style={{ color: "white", textDecoration: "none" }}>
+            <Link to="/signup" className="navbar-link auth">
               Sign Up
             </Link>
           </>

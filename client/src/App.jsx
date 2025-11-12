@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
-import "./App.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./App.css"; // <-- new CSS file for navbar, spacing, etc.
 
 import Library from "./pages/Library";
 import MyLibrary from "./pages/MyLibrary";
@@ -30,37 +30,69 @@ function App() {
   };
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Hi {user ? user.name : "Guest"}</h1>
+    <div className="app-container">
+      {/* Header */}
+      <header className="navbar">
+        <h1 className="navbar-title">📚 Library Management System</h1>
+        <nav className="navbar-links">
+          <Link to="/" className="nav-link">Library</Link>
+          <Link to="/book-of-the-day" className="nav-link">Book of the Day</Link>
+          <Link to="/author-of-the-day" className="nav-link">Author of the Day</Link>
 
-      <nav style={{ marginBottom: "20px" }}>
-        <Link to="/" style={{ marginRight: 10 }}>Library</Link>
-        <Link to="/book-of-the-day" style={{ marginRight: 10 }}>Book of the Day</Link>
-        <Link to="/author-of-the-day" style={{ marginRight: 10 }}>Author of the Day</Link>
-        {user && <Link to="/my-library" style={{ marginRight: 10 }}>My Library</Link>}
-        {user && <Link to="/membership" style={{ marginRight: 10 }}>Membership</Link>}
+          {user && (
+            <>
+              <Link to="/my-library" className="nav-link">My Library</Link>
+              <Link to="/membership" className="nav-link">Membership</Link>
+            </>
+          )}
 
-        {!user ? (
-          <>
-            <Link to="/signin" style={{ marginRight: 10, color: "green" }}>Sign In</Link>
-            <Link to="/signup" style={{ color: "blue" }}>Sign Up</Link>
-          </>
-        ) : (
-          <button onClick={handleSignOut} style={{ marginLeft: 10, background: "red", color: "white" }}>
-            Sign Out
-          </button>
-        )}
-      </nav>
+          {!user ? (
+            <>
+              <Link to="/signin" className="btn btn-signin">Sign In</Link>
+              <Link to="/signup" className="btn btn-signup">Sign Up</Link>
+            </>
+          ) : (
+            <div className="user-section">
+              <span className="welcome-text">Hi, {user.name} 👋</span>
+              <button onClick={handleSignOut} className="btn btn-signout">
+                Sign Out
+              </button>
+            </div>
+          )}
+        </nav>
+      </header>
 
-      <Routes>
-        <Route path="/" element={<Library />} />
-        <Route path="/book-of-the-day" element={<BookOfTheDay />} />
-        <Route path="/author-of-the-day" element={<AuthorOfTheDay />} />
-        <Route path="/signin" element={<SignIn setUser={setUser} />} />
-        <Route path="/signup" element={<SignUp setUser={setUser} />} />
-        <Route path="/my-library" element={<ProtectedRoute><MyLibrary /></ProtectedRoute>} />
-        <Route path="/membership" element={<ProtectedRoute><Membership /></ProtectedRoute>} />
-      </Routes>
+      {/* Main Content */}
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Library />} />
+          <Route path="/book-of-the-day" element={<BookOfTheDay />} />
+          <Route path="/author-of-the-day" element={<AuthorOfTheDay />} />
+          <Route path="/signin" element={<SignIn setUser={setUser} />} />
+          <Route path="/signup" element={<SignUp setUser={setUser} />} />
+          <Route
+            path="/my-library"
+            element={
+              <ProtectedRoute>
+                <MyLibrary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/membership"
+            element={
+              <ProtectedRoute>
+                <Membership />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
+
+      {/* Footer */}
+      <footer className="footer">
+        © {new Date().getFullYear()} Library Management System. All Rights Reserved.
+      </footer>
 
       <ToastContainer position="top-center" autoClose={2000} />
     </div>

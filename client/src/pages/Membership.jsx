@@ -1,4 +1,5 @@
 import React from "react";
+import "./Membership.css";
 
 const Membership = () => {
   const plans = [
@@ -10,7 +11,7 @@ const Membership = () => {
         "Access to e-books",
         "Email support",
       ],
-      color: "#dbeafe",
+      colorClass: "basic",
     },
     {
       name: "Premium",
@@ -21,7 +22,7 @@ const Membership = () => {
         "Priority support",
         "Early access to new arrivals",
       ],
-      color: "#fef9c3",
+      colorClass: "premium",
     },
     {
       name: "Platinum",
@@ -32,50 +33,36 @@ const Membership = () => {
         "Personal recommendations",
         "Lifetime access to archives",
       ],
-      color: "#dcfce7",
+      colorClass: "platinum",
     },
   ];
 
+  const handleSelect = (plan) => {
+    alert(`You selected the ${plan.name} plan!`);
+  };
+
   return (
-    <div style={{ padding: "30px", textAlign: "center" }}>
-      <h2 style={{ marginBottom: "20px" }}>Library Membership Plans</h2>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "20px",
-          flexWrap: "wrap",
-        }}
-      >
+    <div className="membership-container">
+      <h2 className="membership-title">💎 Library Membership Plans</h2>
+      <p className="membership-subtitle">
+        Unlock more reading power with our flexible membership options.
+      </p>
+
+      <div className="membership-grid">
         {plans.map((plan) => (
-          <div
-            key={plan.name}
-            style={{
-              backgroundColor: plan.color,
-              padding: "20px",
-              borderRadius: "10px",
-              width: "250px",
-              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h3>{plan.name}</h3>
-            <h4>{plan.price}</h4>
-            <ul style={{ listStyle: "none", padding: 0, textAlign: "left" }}>
-              {plan.features.map((f, i) => (
-                <li key={i}>✅ {f}</li>
+          <div key={plan.name} className={`membership-card ${plan.colorClass}`}>
+            <h3 className="plan-name">{plan.name}</h3>
+            <h4 className="plan-price">{plan.price}</h4>
+
+            <ul className="plan-features">
+              {plan.features.map((feature, i) => (
+                <li key={i}>✅ {feature}</li>
               ))}
             </ul>
+
             <button
-              style={{
-                background: "#007bff",
-                color: "white",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "5px",
-                cursor: "pointer",
-                marginTop: "10px",
-              }}
-              onClick={() => alert(`You selected the ${plan.name} plan!`)}
+              className="join-btn"
+              onClick={() => handleSelect(plan)}
             >
               Join Now
             </button>

@@ -1,0 +1,90 @@
+/* General Navbar Layout */
+.navbar {
+  background-color: #2d4b3a; /* deep forest green */
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 32px;
+  border-bottom: 4px solid #c1a057; /* golden accent */
+  font-family: "Poppins", sans-serif;
+}
+
+/* Left Side */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-logo {
+  color: #f5f2e7;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+.navbar-greeting {
+  font-size: 16px;
+  font-weight: 500;
+  color: #f5f2e7;
+}
+
+/* Right Side */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: #f5f2e7;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: #c1a057;
+}
+
+/* Buttons */
+.signout-btn {
+  background-color: #c14b4b;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.signout-btn:hover {
+  background-color: #a33b3b;
+}
+
+/* Auth links (Sign In / Sign Up) */
+.auth {
+  background-color: #c1a057;
+  padding: 7px 14px;
+  border-radius: 6px;
+  color: white;
+}
+
+.auth:hover {
+  background-color: #5a3e2b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    padding: 10px 16px;
+  }
+
+  .navbar-right {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
